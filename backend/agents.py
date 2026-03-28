@@ -2,7 +2,7 @@ import json
 from openai import OpenAI
 from dotenv import load_dotenv
 from fir_schema import FIR_SCHEMA
-
+ 
 load_dotenv()
 client = OpenAI()
 
