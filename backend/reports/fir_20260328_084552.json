@@ -1,0 +1,23 @@
+{
+    "complainant": {
+        "personal_info": {
+            "nature_of_complaint": "phone stolen"
+        }
+    },
+    "accused": {
+        "name_of_accused": "suresh"
+    },
+    "incident": {
+        "place_of_incident": "kondhwa",
+        "type_of_incident": "",
+        "date_of_incident": "26 april 2025",
+        "time_of_incident": "12pm"
+    },
+    "complaint_submission": {
+        "knows_police_station": "yes",
+        "police_station": "kondhwa"
+    },
+    "complaint_detail": {
+        "complaint_description": "dkkd dkdkdk"
+    }
+}
