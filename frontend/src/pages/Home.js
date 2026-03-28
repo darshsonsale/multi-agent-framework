@@ -22,41 +22,43 @@ function Home() {
 
       {/* HERO */}
       <section className="hero">
-        <div className="hero-tag">✦ AI-Powered Legal Filing</div>
+        <div className="hero-content">
+          <div className="hero-tag">✦ AI-Powered Legal Filing</div>
 
-        <h1 className="hero-heading">
-          File your FIR<br />
-          <em>without the chaos.</em>
-        </h1>
+          <h1 className="hero-heading">
+            File your FIR<br />
+            <em>without the chaos.</em>
+          </h1>
 
-        <p className="hero-sub">
-          eFIR guides you through the entire First Information Report process —
-          intelligently, step by step. No forms. No confusion. Just answers.
-        </p>
+          <p className="hero-sub">
+            eFIR guides you through the entire First Information Report process —
+            intelligently, step by step. No forms. No confusion. Just answers.
+          </p>
 
-        <div className="hero-actions">
-          <button className="btn-primary" onClick={() => navigate("/auth")}>
-            Get started <span className="arrow-circle">↗</span>
-          </button>
-          <button className="btn-ghost" onClick={() => navigate("/auth")}>
-            See how it works ▶
-          </button>
-        </div>
-
-        <div className="hero-stat-bar">
-          <div className="stat">
-            <strong>10,000+</strong>
-            <span>FIRs Filed</span>
+          <div className="hero-actions">
+            <button className="btn-primary" onClick={() => navigate("/auth")}>
+              Get started <span className="arrow-circle">↗</span>
+            </button>
+            <button className="btn-ghost" onClick={() => navigate("/auth")}>
+              See how it works ▶
+            </button>
           </div>
-          <div className="stat-divider" />
-          <div className="stat">
-            <strong>3 min</strong>
-            <span>Average filing time</span>
-          </div>
-          <div className="stat-divider" />
-          <div className="stat">
-            <strong>100%</strong>
-            <span>Guided process</span>
+
+          <div className="hero-stat-bar">
+            <div className="stat">
+              <strong>10,000+</strong>
+              <span>FIRs Filed</span>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat">
+              <strong>3 min</strong>
+              <span>Average filing time</span>
+            </div>
+            <div className="stat-divider" />
+            <div className="stat">
+              <strong>100%</strong>
+              <span>Guided process</span>
+            </div>
           </div>
         </div>
 

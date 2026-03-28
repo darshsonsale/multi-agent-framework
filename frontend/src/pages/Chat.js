@@ -31,8 +31,84 @@ function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
+  const [isListening, setIsListening] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
   const chatBottomRef = useRef(null);
   const inputRef = useRef(null);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
+        await sendAudioToBackend(audioBlob);
+        
+        // Stop all tracks to release microphone
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorderRef.current.start();
+      setIsListening(true);
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+      alert("Microphone access denied or not supported.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isListening) {
+      mediaRecorderRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
+  const sendAudioToBackend = async (blob) => {
+    setIsProcessing(true);
+    const formData = new FormData();
+    formData.append("file", blob, "voice.wav");
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/voice-to-text", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Failed to transcribe audio");
+      }
+
+      const data = await res.json();
+      if (data.transcript) {
+        // Append transcribed text
+        setInput((prev) => (prev ? `${prev} ${data.transcript}` : data.transcript));
+      }
+    } catch (err) {
+      console.error("Transcription error:", err);
+      alert(`Error transcribing: ${err.message}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -209,6 +285,16 @@ function Chat() {
               onKeyDown={handleKey}
               placeholder="Describe the incident in detail…"
             />
+            <button
+              className={`mic-btn ${isListening ? "active" : ""} ${isProcessing ? "processing" : ""}`}
+              onClick={toggleListening}
+              disabled={isProcessing}
+              title={isListening ? "Stop listening" : isProcessing ? "Processing..." : "Start voice typing (Sarvam AI)"}
+            >
+              <span className="mic-icon">
+                {isProcessing ? "⏳" : isListening ? "🛑" : "🎤"}
+              </span>
+            </button>
             <button
               className="send-btn"
               onClick={sendMessage}

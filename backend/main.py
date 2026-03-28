@@ -2,9 +2,10 @@ import os
 import json
 import subprocess
 from datetime import datetime
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+import httpx
 from pydantic import BaseModel
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -20,6 +21,8 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     print("⚠️ Supabase credentials missing in .env")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
+
+SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
 
 app = FastAPI()
 
@@ -50,6 +53,48 @@ USER_DATA_FILE = "userData.json"
 @app.get("/")
 def home():
     return {"message": "Backend running 🚀"}
+
+@app.post("/voice-to-text")
+async def voice_to_text(file: UploadFile = File(...)):
+    if not SARVAM_API_KEY:
+        print("⚠️ SARVAM_API_KEY missing in .env")
+        raise HTTPException(status_code=500, detail="Sarvam API Key not configured")
+
+    try:
+        # Read the uploaded file
+        content = await file.read()
+        
+        # Call Sarvam AI REST API
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            files = {"file": (file.filename or "audio.wav", content, file.content_type or "audio/wav")}
+            data = {"model": "saaras:v3"}
+            
+            headers = {"api-subscription-key": SARVAM_API_KEY}
+            
+            response = await client.post(
+                "https://api.sarvam.ai/speech-to-text",
+                headers=headers,
+                files=files,
+                data=data
+            )
+            
+            if response.status_code != 200:
+                print(f"❌ Sarvam AI API Error: {response.status_code} - {response.text}")
+                # Fallback check if response has detail
+                err_msg = response.json().get("detail", "Voice processing failed") if response.headers.get("content-type") == "application/json" else "Voice processing failed"
+                raise HTTPException(status_code=response.status_code, detail=err_msg)
+            
+            res_data = response.json()
+            transcript = res_data.get("transcript", "")
+            
+            print(f"🎙️ Sarvam AI Transcript: {transcript}")
+            return {"transcript": transcript}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Voice Processing Failure: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process voice: {str(e)}")
 
 @app.post("/login")
 def login(req: LoginRequest):
