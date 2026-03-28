@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
-from pydantic import BaseModel
+from pydantic import BaseModel 
 from supabase import create_client, Client
 from dotenv import load_dotenv
 from graph import graph
