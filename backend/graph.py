@@ -4,6 +4,7 @@ from agents import *
 
 def get_msg(state):
     return state["messages"][-1]["content"]
+    
 
 
 def intent_node(state):
